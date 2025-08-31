@@ -1,9 +1,10 @@
-API_ID = 123456  # Replace with your actual API ID
-API_HASH = "your_api_hash"
-BOT_TOKEN = "your_bot_token"
-MONGO_URI = "your_mongodb_uri"
+API_ID = 27020363  # Replace with your actual API ID
+API_HASH = "900133bfe09ce6ef78885e3599ba64ca"
+BOT_TOKEN = ""
+MONGO_URI = "mongodb+srv://Billobb:Billobb@billobb.v67fmki.mongodb.net/?retryWrites=true&w=majority&appName=billobb"
 
-LOG_CHANNEL_ID = -1001122334455  # Channel where bot logs status
-FILE_CHANNELS = [-1001234567890, -1009876543210]  # Channels to search files from
+LOG_CHANNEL_ID = -1002967483523  # Channel where bot logs status
+FILE_CHANNELS = [-1002789851054]  # Channels to search files from
 
-ADMINS = [123456789]  # Your Telegram ID
+
+ADMINS = [1222287481]  # Your Telegram ID
