@@ -5,14 +5,14 @@ import pymongo
 from pymongo import MongoClient
 
 # Replace these with your actual values
-API_ID = 1234567  # Your API ID
-API_HASH = "your_api_hash"  # Your API Hash
-BOT_TOKEN = "your_bot_token"  # Your Bot Token from BotFather
-MONGO_URI = "mongodb://your_mongo_uri"  # Your MongoDB connection string
+API_ID = 27020363  # Your API ID
+API_HASH = "900133bfe09ce6ef78885e3599ba64ca"  # Your API Hash
+BOT_TOKEN = "8334188484:AAFIJACJ0YPy9LhX3ONh4FztqX47mz7ZC3c"  # Your Bot Token from BotFather
+MONGO_URI = "mongodb+srv://Billobb:Billobb@billobb.v67fmki.mongodb.net/?retryWrites=true&w=majority&appName=billobb"  # Your MongoDB connection string
 DB_NAME = "movie_bot_db"  # Database name
 COLLECTION_NAME = "movies"  # Collection name for storing movie data
-LOG_CHANNEL_ID = -1001234567890  # ID of the log channel (include -100 for channels)
-FILE_CHANNEL_ID = -1000987654321  # ID of the file storage channel (include -100 for channels)
+LOG_CHANNEL_ID = -1002967483523  # ID of the log channel (include -100 for channels)
+FILE_CHANNEL_ID = -1002789851054  # ID of the file storage channel (include -100 for channels)
 
 # Initialize MongoDB
 mongo_client = MongoClient(MONGO_URI)
@@ -108,4 +108,5 @@ async def main():
 
 # Run the bot
 if __name__ == "__main__":
+
     asyncio.run(main())
