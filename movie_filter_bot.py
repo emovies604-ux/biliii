@@ -5,6 +5,7 @@ from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 import pymongo
 from pymongo import MongoClient
 import re
+import asyncio
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -151,14 +152,23 @@ async def reindex(client: Client, message: Message):
 async def start(client: Client, message: Message):
     await message.reply_text("Welcome to Movie Filter Bot! Send a movie name to search.")
 
+
+# ... (rest of your existing code remains unchanged) ...
+
 # Bot start
 async def main():
     await app.start()
     await send_log("Bot started successfully.")
     logger.info("Bot started")
-    await app.idle()
-    await send_log("Bot stopped.")
-    logger.info("Bot stopped")
+    # Keep the bot running using asyncio.Event
+    stop_event = asyncio.Event()
+    try:
+        await stop_event.wait()  # Wait indefinitely until interrupted
+    finally:
+        await app.stop()
+        await send_log("Bot stopped.")
+        logger.info("Bot stopped")
 
 if __name__ == "__main__":
     app.run(main())
+
