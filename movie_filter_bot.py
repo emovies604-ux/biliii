@@ -11,16 +11,14 @@ import asyncio
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Placeholders for your credentials - replace with actual values
-API_ID = "27020363"  # e.g., 1234567
-API_HASH = "900133bfe09ce6ef78885e3599ba64ca"  # e.g., "abcdef1234567890"
-BOT_TOKEN = "8334188484:AAFIJACJ0YPy9LhX3ONh4FztqX47mz7ZC3c"  # e.g., "123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11"
-MONGO_URI = "mongodb+srv://Billobb:Billobb@billobb.v67fmki.mongodb.net/?retryWrites=true&w=majority&appName=billobb"  # e.g., "mongodb+srv://user:pass@cluster.mongodb.net/dbname"
-LOG_CHANNEL = "-1002967483523"  # e.g., -1001234567890 or "@logchannel"
-FILES_CHANNEL = "-1002789851054"  # e.g., -1009876543210 or "@fileschannel"
-
-# Optional: Admin user ID for restricted commands
-ADMIN_ID = 1222287481  # Replace with your Telegram user ID
+# Replace with your actual credentials
+API_ID = "your_api_id"
+API_HASH = "your_api_hash"
+BOT_TOKEN = "your_bot_token"
+MONGO_URI = "your_mongo_uri"
+LOG_CHANNEL = -1001234567890  # Replace with actual channel ID
+FILES_CHANNEL = -1009876543210  # Replace with actual channel ID
+ADMIN_ID = 123456789  # Replace with your Telegram user ID
 
 # Connect to MongoDB
 try:
@@ -38,19 +36,19 @@ app = Client("movie_filter_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT
 # Function to send log messages
 async def send_log(message: str):
     try:
+        logger.info(f"Attempting to send log to {LOG_CHANNEL}")
         await app.send_message(LOG_CHANNEL, message)
     except Exception as e:
-        logger.error(f"Failed to send log: {e}")
+        logger.error(f"Failed to send log to {LOG_CHANNEL}: {e}")
 
-# Parse movie name from caption (simple: take the whole caption or extract title)
+# Parse movie name from caption
 def parse_movie_name(caption: str) -> str:
     if not caption:
         return None
-    # Simple parsing: assume caption is movie name, optionally with year like "Movie Name (2023)"
     match = re.match(r"^(.*?)(?:\s*\(\d{4}\))?$", caption.strip())
     return match.group(1).strip().lower() if match else caption.strip().lower()
 
-# Handler for new messages in files channel (to index new movies)
+# Handler for new messages in files channel
 @app.on_message(filters.chat(FILES_CHANNEL) & (filters.document | filters.video))
 async def index_movie(client: Client, message: Message):
     if not message.caption:
@@ -62,7 +60,6 @@ async def index_movie(client: Client, message: Message):
         await send_log(f"Invalid caption for file: {message.id}")
         return
     
-    # Store in DB: upsert to avoid duplicates
     movies_collection.update_one(
         {"name": movie_name},
         {"$set": {"message_id": message.id, "channel_id": FILES_CHANNEL}},
@@ -71,19 +68,17 @@ async def index_movie(client: Client, message: Message):
     await send_log(f"Indexed new movie: {movie_name} (msg_id: {message.id})")
     logger.info(f"Indexed: {movie_name}")
 
-# Handler for user queries (in private or group chats)
+# Handler for user queries
 @app.on_message(filters.text & ~filters.chat([LOG_CHANNEL, FILES_CHANNEL]) & ~filters.bot)
 async def handle_query(client: Client, message: Message):
     query = message.text.strip().lower()
     
-    # Search in DB (simple exact match or partial)
     results = list(movies_collection.find({"name": {"$regex": query, "$options": "i"}}).limit(10))
     
     if not results:
         await message.reply_text("No movies found matching your query.")
         return
     
-    # Prepare reply with buttons or list
     if len(results) == 1:
         movie = results[0]
         try:
@@ -98,7 +93,6 @@ async def handle_query(client: Client, message: Message):
             await message.reply_text("Error sending the movie file.")
             await send_log(f"Error sending movie: {e}")
     else:
-        # Multiple results: show buttons
         buttons = []
         for movie in results:
             buttons.append([InlineKeyboardButton(movie['name'].title(), callback_data=f"movie_{movie['_id']}")])
@@ -129,12 +123,12 @@ async def handle_callback(client: Client, callback_query):
         await callback_query.answer("Error sending the movie file.", show_alert=True)
         await send_log(f"Error sending movie via callback: {e}")
 
-# Admin command to re-index all files in channel (careful, can be slow for large channels)
+# Admin command to re-index files
 @app.on_message(filters.command("index") & filters.user(ADMIN_ID))
 async def reindex(client: Client, message: Message):
     await message.reply_text("Starting re-indexing...")
     count = 0
-    async for msg in client.iter_messages(FILES_CHANNEL, limit=0):  # limit=0 for all
+    async for msg in client.iter_messages(FILES_CHANNEL, limit=0):
         if msg.document or msg.video:
             movie_name = parse_movie_name(msg.caption)
             if movie_name:
@@ -152,18 +146,24 @@ async def reindex(client: Client, message: Message):
 async def start(client: Client, message: Message):
     await message.reply_text("Welcome to Movie Filter Bot! Send a movie name to search.")
 
-
-# ... (rest of your existing code remains unchanged) ...
-
-# Bot start
+# Bot start with peer resolution
 async def main():
     await app.start()
-    await send_log("Bot started successfully.")
-    logger.info("Bot started")
-    # Keep the bot running using asyncio.Event
-    stop_event = asyncio.Event()
     try:
-        await stop_event.wait()  # Wait indefinitely until interrupted
+        # Resolve channel IDs to ensure Telegram recognizes them
+        for channel in [LOG_CHANNEL, FILES_CHANNEL]:
+            try:
+                await app.get_chat(channel)
+                logger.info(f"Successfully resolved channel: {channel}")
+            except Exception as e:
+                logger.error(f"Failed to resolve channel {channel}: {e}")
+                await app.stop()
+                exit(1)
+        await send_log("Bot started successfully.")
+        logger.info("Bot started")
+        # Keep the bot running
+        stop_event = asyncio.Event()
+        await stop_event.wait()
     finally:
         await app.stop()
         await send_log("Bot stopped.")
@@ -171,4 +171,3 @@ async def main():
 
 if __name__ == "__main__":
     app.run(main())
-
