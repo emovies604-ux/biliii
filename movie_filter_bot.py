@@ -12,13 +12,13 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Replace with your actual credentials
-API_ID = "your_api_id"
-API_HASH = "your_api_hash"
-BOT_TOKEN = "your_bot_token"
-MONGO_URI = "your_mongo_uri"
-LOG_CHANNEL = -1001234567890  # Replace with actual channel ID
-FILES_CHANNEL = -1009876543210  # Replace with actual channel ID
-ADMIN_ID = 123456789  # Replace with your Telegram user ID
+API_ID = "27020363"
+API_HASH = "900133bfe09ce6ef78885e3599ba64ca"
+BOT_TOKEN = "8334188484:AAFIJACJ0YPy9LhX3ONh4FztqX47mz7ZC3c"
+MONGO_URI = "mongodb+srv://Billobb:Billobb@billobb.v67fmki.mongodb.net/?retryWrites=true&w=majority&appName=billobb"
+LOG_CHANNEL = -1002967483523  # Replace with actual channel ID
+FILES_CHANNEL = -1002789851054  # Replace with actual channel ID
+ADMIN_ID = 1222287481  # Replace with your Telegram user ID
 
 # Connect to MongoDB
 try:
@@ -171,3 +171,4 @@ async def main():
 
 if __name__ == "__main__":
     app.run(main())
+
